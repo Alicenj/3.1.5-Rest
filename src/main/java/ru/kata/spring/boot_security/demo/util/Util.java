@@ -15,14 +15,14 @@ public class Util {
     private final UserServiceImpl userService;
     private final RoleServiceImpl roleService;
 
-    @Autowired
+        @Autowired
     public Util(UserServiceImpl userService, RoleServiceImpl roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
 
     @PostConstruct
-    private void createRoleAndUser() {
+    private void createRoleAndUser() { /*
         Role adminRole = new Role("ROLE_ADMIN");
         Role userRole = new Role("ROLE_USER");
 
@@ -36,6 +36,6 @@ public class Util {
                 "user", "user", "userMail", Set.of(userRole));
 
         userService.saveUser(admin);
-        userService.saveUser(user);
+        userService.saveUser(user); */
    }
 }
