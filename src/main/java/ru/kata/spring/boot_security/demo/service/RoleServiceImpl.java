@@ -7,9 +7,10 @@ import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 
 import java.util.List;
 
+
 @Service
 public class RoleServiceImpl implements RoleService {
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
     @Autowired
     public RoleServiceImpl(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
@@ -18,15 +19,5 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> getRoles() {
         return roleRepository.findAll();
-    }
-
-    @Override
-    public void saveRoles(Role role) {
-        roleRepository.save(role);
-    }
-
-    @Override
-    public void removeRoleById(Long id) {
-        roleRepository.deleteById(id);
     }
 }
