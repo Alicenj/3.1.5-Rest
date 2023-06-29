@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.UserAlreadyExistsException;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 @RestController
@@ -35,9 +36,9 @@ public class UserController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<User> perfomRegistration(@RequestBody User user, BindingResult bindingResult) {
+    public ResponseEntity<User> perfomRegistration(@RequestBody User user, BindingResult bindingResult) throws UserAlreadyExistsException {
 
-        userService.saveUser(user);
+            User createdUser = userService.saveUser(user);
 
         if (bindingResult.hasErrors()) {
             return ResponseEntity.ok(user);

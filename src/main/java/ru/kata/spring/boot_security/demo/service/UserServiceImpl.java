@@ -24,7 +24,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User saveUser(User user) {
+    public User saveUser(User user) throws UserAlreadyExistsException {
+        String username = user.getUsername();
+        if (userRepository.existsByUsername(username)) {
+            throw new UserAlreadyExistsException("User with username " + username + " already exists.");
+        }
+
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return user;
@@ -41,7 +46,7 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
 
-        return user.orElseThrow(()->new UsernameNotFoundException(String.format("User with %s not found", id)));
+        return user.orElseThrow(() -> new UsernameNotFoundException(String.format("User with %s not found", id)));
     }
 
     @Override
@@ -53,14 +58,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUser(Long id, User user) {
+    public User updateUser(Long id, User user) throws UserNotFoundException, UserAlreadyExistsException {
+        String username = user.getUsername();
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException("User with ID " + id + " not found.");
+        }
+
+        // Проверяем, совпадает ли имя пользователя с уже существующими записями, исключая текущего пользователя
+        if (userRepository.existsByUsernameAndIdNot(username, id)) {
+            throw new UserAlreadyExistsException("User with username " + username + " already exists.");
+        }
 
         if (user.getPassword().isEmpty()) {
             user.setPassword(getUserById(id).getPassword());
-
-            userRepository.save(user);
-
+        } else {
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         }
+
+        userRepository.save(user);
         return user;
     }
 

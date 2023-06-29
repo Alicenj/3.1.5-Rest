@@ -113,31 +113,49 @@ async function newUser() {
         e.preventDefault();
         let newUserRoles = [];
         for (let i = 0; i < createForm.role.options.length; i++) {
-            if (createForm.role.options[i].selected) newUserRoles.push({
-                id: createForm.role.options[i].value,
-                roles: createForm.role.options[i].text
-            })
+            if (createForm.role.options[i].selected)
+                newUserRoles.push({
+                    id: createForm.role.options[i].value,
+                    roles: createForm.role.options[i].text,
+                });
         }
 
-        fetch("/api/admin/new", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: createForm.usernameNew.value,
-                name: createForm.nameNew.value,
-                surname: createForm.surnameNew.value,
-                email: createForm.emailNew.value,
-                password: createForm.passwordNew.value,
-                roles: newUserRoles
-            })
-        }).then(() => {
-            console.log("создан пользователь: ");
-            createForm.reset();
-            $('#addFormCloseButton').click();
-            getAllUsers();
-        })
+        try {
+            const response = await fetch("/api/admin/new", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: createForm.usernameNew.value,
+                    name: createForm.nameNew.value,
+                    surname: createForm.surnameNew.value,
+                    email: createForm.emailNew.value,
+                    password: createForm.passwordNew.value,
+                    roles: newUserRoles,
+                }),
+            });
+
+            if (response.ok) {
+                console.log("Пользователь успешно создан");
+                createForm.reset();
+                $('#addFormCloseButton').click();
+                getAllUsers();
+            } else {
+                const errorResponse = await response.json(); // Получение данных об ошибке из ответа сервера
+                displayErrorMessage(errorResponse); // Отображение ошибки на странице
+            }
+        } catch (error) {
+            console.error("Произошла ошибка при создании пользователя:", error);
+            // Обработка ошибки, например, вывод сообщения об ошибке пользователю
+            alert("Ошибка при создании пользователя. Пожалуйста, попробуйте еще раз.");
+        }
+    }
+
+    function displayErrorMessage(errorMessage) {
+        const errorContainer = document.getElementById("errorContainer");
+        errorContainer.textContent = errorMessage;
+        errorContainer.style.display = "block";
     }
 }
 
@@ -202,7 +220,6 @@ async function showDeleteModal(id) {
 
 
 function updateUser() {
-
     const editForm = document.forms["editForm"];
     const id = editForm.idEdit.value;
     const hrefEdit = `/api/admin/edit/${id}`;
@@ -211,34 +228,52 @@ function updateUser() {
         ev.preventDefault();
         let editUserRoles = [];
         for (let i = 0; i < editForm.rolesEdit.options.length; i++) {
-            if (editForm.rolesEdit.options[i].selected) editUserRoles.push({
-                id: editForm.rolesEdit.options[i].value,
-                role: editForm.rolesEdit.options[i].text
-            })
+            if (editForm.rolesEdit.options[i].selected)
+                editUserRoles.push({
+                    id: editForm.rolesEdit.options[i].value,
+                    role: editForm.rolesEdit.options[i].text,
+                });
         }
 
-        fetch(hrefEdit, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: id,
-                username: editForm.usernameEdit.value,
-                name: editForm.nameEdit.value,
-                surname: editForm.surnameEdit.value,
-                email: editForm.emailEdit.value,
-                password: editForm.passwordEdit.value,
-                roles: editUserRoles,
-            }),
-        })
-            .then(() => {
-                console.log("пользователь изменен", id);
+        try {
+            const response = await fetch(hrefEdit, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: id,
+                    username: editForm.usernameEdit.value,
+                    name: editForm.nameEdit.value,
+                    surname: editForm.surnameEdit.value,
+                    email: editForm.emailEdit.value,
+                    password: editForm.passwordEdit.value,
+                    roles: editUserRoles,
+                }),
+            });
+
+            if (response.ok) {
+                console.log("Пользователь успешно обновлен");
                 getAllUsers();
                 $('#editFormCloseButton').click();
-            });
+            } else {
+                const errorResponse = await response.json(); // Получение данных об ошибке из ответа сервера
+                displayErrorMessage(errorResponse); // Отображение ошибки на странице
+            }
+        } catch (error) {
+            console.error("Произошла ошибка при обновлении пользователя:", error);
+            // Обработка ошибки, например, вывод сообщения об ошибке пользователю
+            alert("Ошибка при обновлении пользователя. Пожалуйста, попробуйте еще раз.");
+        }
     });
 }
+
+function displayErrorMessage(errorMessage) {
+    const errorContainer = document.getElementById("errorContainer2");
+    errorContainer.textContent = errorMessage;
+    errorContainer.style.display = "block";
+}
+
 
 $('#editUserModal').on('show.bs.modal', (ev) => {
     let button = $(ev.relatedTarget);
